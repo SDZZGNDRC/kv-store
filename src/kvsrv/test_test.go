@@ -464,7 +464,7 @@ func TestMemPutManyClients(t *testing.T) {
 		NCLIENT = 100_000
 		MEM     = 1000
 	)
-
+	fmt.Printf("Start\n")
 	cfg := make_config(t, false)
 	defer cfg.cleanup()
 
@@ -474,6 +474,9 @@ func TestMemPutManyClients(t *testing.T) {
 	for i, _ := range cks {
 		cks[i] = cfg.makeClient()
 	}
+	// Flag1
+	start := time.Now() // 记录开始时间
+	fmt.Printf("Flag1 时间点: %v\n", start.Format("15:04:05.000"))
 
 	// allow threads started by labrpc to start
 	time.Sleep(1 * time.Second)
@@ -501,6 +504,10 @@ func TestMemPutManyClients(t *testing.T) {
 	if m1 > m0+(NCLIENT*200) {
 		t.Fatalf("error: server using too much memory %d %d (%.2f per client)\n", m0, m1, f)
 	}
+	// Flag2
+	flag2Time := time.Now()
+	fmt.Printf("Flag2 时间点: %v\n", flag2Time.Format("15:04:05.000"))
+	fmt.Printf("Flag1 到 Flag2 间隔: %v\n", flag2Time.Sub(start))
 
 	for _, ck := range cks {
 		cfg.deleteClient(ck)
@@ -513,7 +520,7 @@ func TestMemGetManyClients(t *testing.T) {
 	const (
 		NCLIENT = 100_000
 	)
-
+	fmt.Printf("Start\n")
 	cfg := make_config(t, false)
 	defer cfg.cleanup()
 
@@ -528,6 +535,10 @@ func TestMemGetManyClients(t *testing.T) {
 		cks[i] = cfg.makeClient()
 	}
 
+	// Flag1
+	start := time.Now() // 记录开始时间
+	fmt.Printf("Flag1 时间点: %v\n", start.Format("15:04:05.000"))
+
 	// allow threads started by labrpc to start
 	time.Sleep(1 * time.Second)
 
@@ -538,9 +549,20 @@ func TestMemGetManyClients(t *testing.T) {
 	runtime.ReadMemStats(&st)
 	m0 := st.HeapAlloc
 
+	// Flag2
+	flag2Time := time.Now()
+	fmt.Printf("Flag2 时间点: %v\n", flag2Time.Format("15:04:05.000"))
+	fmt.Printf("Flag1 到 Flag2 间隔: %v\n", flag2Time.Sub(start))
+
 	for i := 0; i < NCLIENT; i++ {
 		cks[i].Get("0")
 	}
+
+	// Flag3
+	flag3Time := time.Now()
+	fmt.Printf("Flag3 时间点: %v\n", flag3Time.Format("15:04:05.000"))
+	fmt.Printf("Flag2 到 Flag3 间隔: %v\n", flag3Time.Sub(flag2Time))
+	fmt.Printf("总耗时: %v\n", flag3Time.Sub(start))
 
 	runtime.GC()
 
@@ -554,11 +576,19 @@ func TestMemGetManyClients(t *testing.T) {
 	if m1 >= m0+NCLIENT*10 {
 		t.Fatalf("error: server using too much memory m0 %d m1 %d (%.2f per client)\n", m0, m1, f)
 	}
-
+	// Flag4
+	flag4Time := time.Now()
+	fmt.Printf("Flag4 时间点: %v\n", flag4Time.Format("15:04:05.000"))
+	fmt.Printf("Flag3 到 Flag4 间隔: %v\n", flag4Time.Sub(flag3Time))
+	fmt.Printf("总耗时: %v\n", flag4Time.Sub(start))
 	for _, ck := range cks {
 		cfg.deleteClient(ck)
 	}
-
+	// Flag5
+	flag5Time := time.Now()
+	fmt.Printf("Flag5 时间点: %v\n", flag5Time.Format("15:04:05.000"))
+	fmt.Printf("Flag4 到 Flag5 间隔: %v\n", flag5Time.Sub(flag4Time))
+	fmt.Printf("总耗时: %v\n", flag5Time.Sub(start))
 	cfg.end()
 }
 
