@@ -3,6 +3,7 @@
         "bigx",
         "clnts",
         "endname",
+        "kvraft",
         "kvsrv",
         "labrpc",
         "linearizability",
